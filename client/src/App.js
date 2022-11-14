@@ -1,10 +1,56 @@
 // import io from "socket.io";
 import { useEffect, useState } from "react";
-import ramdomID from "@warta/randomid--enerator";
-
-const rId = ramdomID(28);
+import { useForm } from "react-hook-form";
+import randomID from "@warta/randomid--enerator";
+import io from "socket.io-client";
 
 const App = () => {
+  const rId = randomID(20);
+  const [socket, setSocket] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [taskName, setTaskName] = useState("");
+  const {
+    register,
+    handleSubmit: validate,
+    formState: { errors },
+  } = useForm();
+
+  useEffect(() => {
+    const socket = io("process.env.PORT" || "8000");
+    setSocket(socket);
+    socket.on("updateData", (tasks) => {
+      updateTasks(tasks);
+    });
+
+    socket.on("addTask", (task) => {
+      addTask(task);
+    });
+
+    socket.on("removeTask", (id) => {
+      removeTask(id);
+    });
+  }, []);
+
+  const removeTask = (id) => {
+    setTasks((tasks) => tasks.filter((task) => task.id !== id));
+  };
+
+  const submitForm = (e) => {
+    e.preventDefault();
+    const task = { name: taskName, id: randomID(rId) };
+    addTask(task);
+    socket.emit("addTask", task);
+    setTaskName("");
+  };
+
+  const addTask = (task) => {
+    setTasks((tasks) => [...tasks, task]);
+    setTaskName("");
+  };
+
+  const updateTasks = (tasksData) => {
+    setTasks(tasksData);
+  };
   return (
     <div className="App">
       <header>
@@ -15,24 +61,42 @@ const App = () => {
         <h2>Tasks</h2>
 
         <ul className="tasks-section__list" id="tasks-list">
-          <li className="task">
-            Shopping <button className="btn btn--red">Remove</button>
-          </li>
-          <li className="task">
-            Go out with a dog <button className="btn btn--red">Remove</button>
-          </li>
+          {tasks.map((task) => (
+            <li key={task.id} className="task">
+              {task.name}
+              <button
+                className="btn btn--red"
+                onClick={() => removeTask(task.id)}
+              >
+                Remove
+              </button>
+            </li>
+          ))}
         </ul>
 
-        <form id="add-task-form">
+        <form
+          id="add-task-form"
+          onSubmit={(e) => {
+            validate(submitForm(e));
+          }}
+        >
           <input
+            {...register("taskName", { required: true, minLength: 3 })}
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
             className="text-input"
             autocomplete="off"
             type="text"
             placeholder="Type your description"
             id="task-name"
           />
+          {errors.title && (
+            <small className="d-block form-text text-danger mt-2">
+              This field is required and should be minimum 3 signs lenght
+            </small>
+          )}
           <button className="btn" type="submit">
-  
+            Add
           </button>
         </form>
       </section>
