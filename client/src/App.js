@@ -9,11 +9,7 @@ const App = () => {
   const [socket, setSocket] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState("");
-  const {
-    register,
-    handleSubmit: validate,
-    formState: { errors },
-  } = useForm();
+  const validateEr = false;
 
   useEffect(() => {
     const socket = io("process.env.PORT" || "8000");
@@ -38,9 +34,12 @@ const App = () => {
   const submitForm = (e) => {
     e.preventDefault();
     const task = { name: taskName, id: randomID(rId) };
-    addTask(task);
-    socket.emit("addTask", task);
-    setTaskName("");
+    if (task === "" || " ") {
+    } else {
+      addTask(task);
+      socket.emit("addTask", task);
+      setTaskName("");
+    }
   };
 
   const addTask = (task) => {
@@ -74,14 +73,8 @@ const App = () => {
           ))}
         </ul>
 
-        <form
-          id="add-task-form"
-          onSubmit={(e) => {
-            validate(submitForm(e));
-          }}
-        >
+        <form id="add-task-form" onSubmit={(e) => submitForm(e)}>
           <input
-            {...register("taskName", { required: true, minLength: 3 })}
             value={taskName}
             onChange={(e) => setTaskName(e.target.value)}
             className="text-input"
@@ -90,11 +83,6 @@ const App = () => {
             placeholder="Type your description"
             id="task-name"
           />
-          {errors.title && (
-            <small className="d-block form-text text-danger mt-2">
-              This field is required and should be minimum 3 signs lenght
-            </small>
-          )}
           <button className="btn" type="submit">
             Add
           </button>
