@@ -5,8 +5,7 @@ const app = express();
 
 const tasks = [];
 
-const server = app.listen(process.env.PORT || 8000, () => {
-  console.log("Server is running...");
+const server = app.listen(process.env.PORT || 8000, () => {console.log("Server is running...");
 });
 
 app.use((req, res) => {

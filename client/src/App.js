@@ -1,6 +1,5 @@
 // import io from "socket.io";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import randomID from "@warta/randomid--enerator";
 import io from "socket.io-client";
 
@@ -9,7 +8,6 @@ const App = () => {
   const [socket, setSocket] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState("");
-  const validateEr = false;
 
   useEffect(() => {
     const socket = io("process.env.PORT" || "8000");
@@ -34,12 +32,9 @@ const App = () => {
   const submitForm = (e) => {
     e.preventDefault();
     const task = { name: taskName, id: randomID(rId) };
-    if (task === "" || " ") {
-    } else {
-      addTask(task);
-      socket.emit("addTask", task);
-      setTaskName("");
-    }
+    addTask(task);
+    socket.emit("addTask", task);
+    setTaskName("");
   };
 
   const addTask = (task) => {
