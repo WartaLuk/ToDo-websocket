@@ -9,10 +9,8 @@
   "author": "Łukasz Wartałowicz",
   "license": "ISC",
   "dependencies": {
-    "@warta/randomid--enerator": "^1.0.1",
     "express": "^4.18.2",
     "nodemon": "^2.0.20",
     "socket.io": "^4.5.3"
   }
 }
-

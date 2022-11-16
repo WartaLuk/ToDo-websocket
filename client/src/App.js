@@ -1,17 +1,16 @@
-// import io from "socket.io";
+import io from "socket.io-client";
 import { useEffect, useState } from "react";
 import randomID from "@warta/randomid--enerator";
-import io from "socket.io-client";
 
-const App = () => {
-  const rId = randomID(20);
+function App() {
   const [socket, setSocket] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState("");
 
   useEffect(() => {
-    const socket = io("process.env.PORT" || "8000");
+    const socket = io("localhost:8000");
     setSocket(socket);
+
     socket.on("updateData", (tasks) => {
       updateTasks(tasks);
     });
@@ -25,13 +24,16 @@ const App = () => {
     });
   }, []);
 
-  const removeTask = (id) => {
-    setTasks((tasks) => tasks.filter((task) => task.id !== id));
+  const removeTask = (taskId, local) => {
+    setTasks((tasks) => tasks.filter((task) => task.id !== taskId));
+    if (local) {
+      socket.emit("removeTask", taskId);
+    }
   };
 
   const submitForm = (e) => {
     e.preventDefault();
-    const task = { name: taskName, id: randomID(rId) };
+    const task = { name: taskName, id: randomID(20) };
     addTask(task);
     socket.emit("addTask", task);
     setTaskName("");
@@ -45,6 +47,7 @@ const App = () => {
   const updateTasks = (tasksData) => {
     setTasks(tasksData);
   };
+
   return (
     <div className="App">
       <header>
@@ -60,7 +63,7 @@ const App = () => {
               {task.name}
               <button
                 className="btn btn--red"
-                onClick={() => removeTask(task.id)}
+                onClick={() => removeTask(task.id, true)}
               >
                 Remove
               </button>
@@ -85,6 +88,6 @@ const App = () => {
       </section>
     </div>
   );
-};
+}
 
 export default App;
