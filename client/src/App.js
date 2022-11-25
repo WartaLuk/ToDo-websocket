@@ -1,4 +1,4 @@
-// import io from "socket.io";
+
 import { useEffect, useState } from "react";
 import randomID from "@warta/randomid--enerator";
 import io from "socket.io-client";
@@ -8,7 +8,6 @@ const App = () => {
   const [socket, setSocket] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState("");
-  const validateEr = false;
 
   useEffect(() => {
     const socket = io(process.env.NODE_ENV === "production" ? "" : 'ws://localhost:8000', { transports: ["websocket"] });
@@ -27,9 +26,6 @@ const App = () => {
     });
   }, []);
 
-  const removeTask = (id) => {
-    setTasks((tasks) => tasks.filter((task) => task.id !== id));
-  };
 
   const submitForm = (e) => {
     e.preventDefault();
@@ -42,6 +38,10 @@ const App = () => {
   const addTask = (task) => {
     setTasks((tasks) => [...tasks, task]);
     setTaskName("");
+  };
+
+  const removeTask = (id) => {
+    setTasks((tasks) => tasks.filter((task) => task.id !== id));
   };
 
   const updateTasks = (tasksData) => {
@@ -63,7 +63,7 @@ const App = () => {
               {task.name}
               <button
                 className="btn btn--red"
-                onClick={() => removeTask(task.id)}
+                onClick={() => removeTask(task.id, true)}
               >
                 Remove
               </button>
