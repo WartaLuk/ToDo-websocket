@@ -1,11 +1,14 @@
 const express = require("express");
 const socket = require("socket.io");
+const cors = require("cors");
+
 const app = express();
+app.use(cors());
 
 const tasks = [];
 
-const server = app.listen(process.env.PORT || 8000, () => {
-  console.log("Server is running...");
+const server = app.listen(8000, () => {
+  console.log("Server running on port: 8000");
 });
 
 app.use((req, res) => {
@@ -15,17 +18,27 @@ app.use((req, res) => {
 const io = socket(server);
 
 io.on("connection", (socket) => {
-  console.log("Client connected with ID:", socket.id);
-  socket.broadcast.emit("updateData", tasks);
+  console.log(socket.id);
+  io.to(socket.id).emit("updateData", tasks);
 
   socket.on("addTask", (task) => {
-    console.log("Get new task" + task);
     tasks.push(task);
     socket.broadcast.emit("addTask", task);
   });
 
-  socket.on("removeTask", (task) => {
-    tasks.splice(tasks.indexOf(task), 1);
-    socket.broadcast.emit("removeTask", task);
+  socket.on("removeTask", (taskId) => {
+    tasks.splice(tasks.indexOf(tasks.find((task) => taskId == task.id)), 1);
+    socket.broadcast.emit("removeTask", taskId);
+  });
+
+  socket.on("editTask", (payload) => {
+    console.log("payload: ", payload);
+    const task = tasks.find((task) => task.id === payload.id);
+    if (task) {
+      task.name = payload.name;
+    }
+
+    socket.broadcast.emit("editTask", payload);
+    console.log("tasks after edit", tasks);
   });
 });

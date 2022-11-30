@@ -4,7 +4,7 @@ import randomID from "@warta/randomid--enerator";
 import io from "socket.io-client";
 
 const App = () => {
-  const rId = randomID(20);
+  const idLen = 20;
   const [socket, setSocket] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState("");
@@ -21,15 +21,15 @@ const App = () => {
       addTask(task);
     });
 
-    socket.on("removeTask", (id) => {
-      removeTask(id);
+    socket.on("removeTask", (taskId) => {
+      removeTask(taskId);
     });
   }, []);
 
 
   const submitForm = (e) => {
     e.preventDefault();
-    const task = { name: taskName, id: randomID(rId) };
+    const task = { name: taskName, id: randomID(idLen) };
       addTask(task);
       socket.emit("addTask", task);
       setTaskName("");
@@ -40,8 +40,8 @@ const App = () => {
     setTaskName("");
   };
 
-  const removeTask = (id) => {
-    setTasks((tasks) => tasks.filter((task) => task.id !== id));
+  const removeTask = (taskId) => {
+    setTasks((tasks) => tasks.filter((task) => task.id !== taskId));
   };
 
   const updateTasks = (tasksData) => {
